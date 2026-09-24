@@ -32,15 +32,35 @@ body {
 
 .shelf-head {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(220px, 0.7fr) minmax(280px, 0.85fr);
-  gap: 28px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  gap: 32px;
+  align-items: start;
   padding: 48px 28px 8px;
 }
 
+.title-line {
+  position: relative;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+}
+
+.title-line h1 {
+  position: relative;
+  z-index: 1;
+  max-width: 16ch;
+}
+
 .sky {
-  height: 220px;
-  min-width: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 118px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 94%, transparent);
 }
 
 .sky canvas {
@@ -529,7 +549,9 @@ main { padding: 12px 28px 40px; }
 
 @media (max-width: 720px) {
   .shelf-head { grid-template-columns: 1fr; gap: 22px; padding: 28px 16px 4px; }
-  .sky { display: none; }
+  .title-line { min-height: 88px; }
+  .title-line h1 { max-width: none; }
+  .sky { height: 72px; }
   .toolbar { flex-direction: column; align-items: stretch; padding-left: 16px; padding-right: 16px; }
   .top {
     flex-direction: column;
