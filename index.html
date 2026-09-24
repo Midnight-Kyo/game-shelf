@@ -13,8 +13,10 @@
       <p class="intro" id="intro"></p>
       <div class="from-her" id="from-her" hidden></div>
     </div>
+    <div class="sky" aria-hidden="true"><canvas id="sky"></canvas></div>
     <aside class="hours-panel" id="hours-panel" aria-label="Where most of my hours went"></aside>
   </header>
+
   <div class="toolbar">
     <label class="search">
       <span class="sr">Search games</span>
@@ -29,11 +31,14 @@
       </select>
     </label>
   </div>
+
   <div class="filters" id="filters" role="tablist" aria-label="Filter by mood"></div>
+
   <main>
     <p class="empty" id="empty" hidden>Nothing matches that.</p>
     <ul class="grid" id="grid"></ul>
   </main>
+
   <script src="games.js"></script>
   <script src="app.js"></script>
 </body>

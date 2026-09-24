@@ -43,7 +43,9 @@ function cleanEntry(value) {
   const liked = !!value?.liked;
   const note = String(value?.note || "").trim().slice(0, 500);
   if (!liked && !note) return null;
-  return { liked, note };
+  const entry = { liked, note };
+  if (note) entry.author = value?.author === "wahab" ? "wahab" : "her";
+  return entry;
 }
 
 module.exports = async function shelf(req, res) {
@@ -67,7 +69,7 @@ module.exports = async function shelf(req, res) {
       return;
     }
     const shelfData = await readShelf();
-    const entry = cleanEntry({ liked: body.liked, note: body.note });
+    const entry = cleanEntry({ liked: body.liked, note: body.note, author: body.author });
     if (entry) shelfData[id] = entry;
     else delete shelfData[id];
     await writeShelf(shelfData);
