@@ -10,7 +10,6 @@ const fromHerEl = document.querySelector("#from-her");
 const FILTERS = [
   ["all", "All"],
   ["together", "We can play together"],
-  ["heart", "Your hearts"],
   ["story", "Story"],
   ["relaxing", "Relaxing"],
   ["funny", "Funny"],
@@ -23,12 +22,6 @@ const FILTERS = [
   ["liked", "Liked"],
   ["noted", "Has a note"]
 ];
-
-const HEART = new Set([
-  "It Takes Two", "Split Fiction", "Unravel Two", "Stardew Valley", "Ori and the Will of the Wisps",
-  "Dispatch", "Marvel’s Spider-Man Remastered", "Hogwarts Legacy", "Baldur's Gate 3", "Little Inferno",
-  "Hi-Fi RUSH", "Spiritfarer"
-]);
 
 const RELAXING = new Set([
   "Stardew Valley", "Ori and the Will of the Wisps", "Little Inferno", "No Man's Sky", "theHunter: Call of the Wild™",
@@ -88,7 +81,6 @@ function moodsOf(game) {
   if (tags.includes("Sim") || tags.includes("Sandbox") || tags.includes("Card")) moods.add("building");
   if (tags.includes("Survival") || tags.includes("VR")) moods.add("exploring");
   if (tags.includes("Card")) moods.add("puzzles");
-  if (HEART.has(game.title)) moods.add("heart");
   if (RELAXING.has(game.title)) moods.add("relaxing");
   if (FUNNY.has(game.title)) moods.add("funny");
   if (PUZZLES.has(game.title)) moods.add("puzzles");
@@ -188,7 +180,7 @@ async function saveShelf(id, patch) {
 
 function renderFilters() {
   filtersEl.innerHTML = FILTERS.map(([id, label]) => `
-    <button type="button" role="tab" data-tag="${id}" aria-selected="${id === activeFilter}">${id === "heart" ? "♥ " : ""}${label}</button>
+    <button type="button" role="tab" data-tag="${id}" aria-selected="${id === activeFilter}">${label}</button>
   `).join("");
 }
 
