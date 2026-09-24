@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wahab's game shelf</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="shelf-head">
+    <div class="intro-block">
+      <h1>Wahab's game shelf</h1>
+      <p class="intro" id="intro"></p>
+      <div class="from-her" id="from-her" hidden></div>
+    </div>
+    <aside class="hours-panel" id="hours-panel" aria-label="Where most of my hours went"></aside>
+  </header>
+  <div class="toolbar">
+    <label class="search">
+      <span class="sr">Search games</span>
+      <input id="search" type="search" placeholder="Search games" autocomplete="off">
+    </label>
+    <label class="sort">
+      <span class="sr">Sort games</span>
+      <select id="sort">
+        <option value="most">Most played</option>
+        <option value="least">Least played</option>
+        <option value="name">Name</option>
+      </select>
+    </label>
+  </div>
+  <div class="filters" id="filters" role="tablist" aria-label="Filter by mood"></div>
+  <main>
+    <p class="empty" id="empty" hidden>Nothing matches that.</p>
+    <ul class="grid" id="grid"></ul>
+  </main>
+  <script src="games.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
