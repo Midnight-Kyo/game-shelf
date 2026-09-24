@@ -120,7 +120,15 @@ function renderHours() {
 }
 
 function entryFor(title) {
-  return shelf[title] || { liked: false, note: "" };
+  return shelf[title] || { liked: false, note: "", author: "" };
+}
+
+function writer() {
+  return localStorage.getItem("shelf-writer") === "wahab" ? "wahab" : "her";
+}
+
+function authorName(author) {
+  return author === "wahab" ? "Wahab" : "Her";
 }
 
 function renderFromHer() {
@@ -137,7 +145,7 @@ function renderFromHer() {
   fromHerEl.innerHTML = `<p><strong>From her.</strong> ${items.map((game) => {
     const entry = entryFor(game.title);
     const mark = entry.liked ? "♥ " : "";
-    const note = entry.note ? ` <span class="from-note">${escapeHtml(entry.note)}</span>` : "";
+    const note = entry.note ? ` <span class="from-note">${escapeHtml(authorName(entry.author || "her"))}: ${escapeHtml(entry.note)}</span>` : "";
     return `<button type="button" data-jump="${escapeHtml(game.title)}">${mark}${escapeHtml(game.title)}</button>${note}`;
   }).join('<span class="dot"> · </span>')}</p>`;
 }
@@ -160,15 +168,18 @@ async function saveShelf(id, patch) {
   const current = entryFor(id);
   const next = {
     liked: patch.liked ?? current.liked,
-    note: patch.note ?? current.note
+    note: patch.note ?? current.note,
+    author: patch.author ?? current.author
   };
+  if (next.note && next.author !== "wahab") next.author = "her";
+  if (!next.note) next.author = "";
   if (!next.liked && !next.note) delete shelf[id];
   else shelf[id] = next;
   renderFromHer();
   const response = await fetch("/api/shelf", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id, liked: !!next.liked, note: next.note || "" })
+    body: JSON.stringify({ id, liked: !!next.liked, note: next.note || "", author: next.author || "her" })
   });
   if (!response.ok) {
     if (previous) shelf[id] = previous;
@@ -227,10 +238,14 @@ function render() {
             <p class="hours">${hoursLabel(game.hours)}</p>
             <p class="blurb">${escapeHtml(game.blurb)}</p>
             <div class="tags">${labels.map((label) => `<span class="tag">${escapeHtml(label)}</span>`).join("")}</div>
-            <label class="note-label">
+            <div class="note-label">
               <span class="sr">Note on ${title}</span>
+              <div class="who" role="group" aria-label="Who is writing">
+                <button type="button" data-who="her" aria-pressed="${(entry.note ? entry.author !== "wahab" : writer() !== "wahab")}">Her</button>
+                <button type="button" data-who="wahab" aria-pressed="${(entry.note ? entry.author === "wahab" : writer() === "wahab")}">Wahab</button>
+              </div>
               <textarea class="note" rows="2" maxlength="500" placeholder="Leave a note" data-id="${title}">${escapeHtml(entry.note || "")}</textarea>
-            </label>
+            </div>
           </div>
         </article>
       </li>`;
@@ -298,6 +313,23 @@ grid.addEventListener("click", async (event) => {
     if (activeFilter === "liked" || activeFilter === "noted") render();
     return;
   }
+  const who = event.target.closest("[data-who]");
+  if (who) {
+    event.stopPropagation();
+    const id = who.closest(".card")?.querySelector(".note")?.dataset.id;
+    localStorage.setItem("shelf-writer", who.dataset.who);
+    who.parentElement.querySelectorAll("[data-who]").forEach((button) => {
+      button.setAttribute("aria-pressed", String(button === who));
+    });
+    if (id && entryFor(id).note && entryFor(id).author !== who.dataset.who) {
+      try {
+        await saveShelf(id, { author: who.dataset.who });
+      } catch {
+        render();
+      }
+    }
+    return;
+  }
   if (event.target.closest(".note, .note-label")) return;
   const card = event.target.closest(".card");
   if (!card) return;
@@ -311,9 +343,10 @@ grid.addEventListener("focusout", async (event) => {
   if (!note) return;
   const id = note.dataset.id;
   const text = note.value.trim();
-  if (text === (entryFor(id).note || "")) return;
+  const author = note.parentElement.querySelector('[data-who][aria-pressed="true"]')?.dataset.who || writer();
+  if (text === (entryFor(id).note || "") && (!text || author === (entryFor(id).author || "her"))) return;
   try {
-    await saveShelf(id, { note: text });
+    await saveShelf(id, { note: text, author });
   } catch {
     note.value = entryFor(id).note || "";
   }
@@ -341,8 +374,66 @@ document.addEventListener("click", (event) => {
   grid.querySelectorAll(".card.open").forEach((item) => item.classList.remove("open"));
 });
 
+function startSky() {
+  const canvas = document.querySelector("#sky");
+  if (!canvas || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const context = canvas.getContext("2d");
+  const motes = Array.from({ length: 42 }, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    r: 0.6 + Math.random() * 1.8,
+    v: 0.012 + Math.random() * 0.03,
+    drift: (Math.random() - 0.5) * 0.02,
+    a: 0.25 + Math.random() * 0.55
+  }));
+  const orbs = [
+    { x: 0.32, y: 0.58, hue: "90, 150, 255", phase: 0 },
+    { x: 0.68, y: 0.42, hue: "255, 110, 150", phase: 1.4 }
+  ];
+  function frame(time) {
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+    context.clearRect(0, 0, width, height);
+    const reach = Math.max(width, height) * 0.42;
+    orbs.forEach((orb, index) => {
+      const x = (orb.x + Math.sin(time / 2800 + orb.phase) * 0.12) * width;
+      const y = (orb.y + Math.cos(time / 3400 + orb.phase) * 0.1) * height;
+      const glow = context.createRadialGradient(x, y, 0, x, y, reach);
+      glow.addColorStop(0, `rgba(${orb.hue}, 0.55)`);
+      glow.addColorStop(1, `rgba(${orb.hue}, 0)`);
+      context.fillStyle = glow;
+      context.beginPath();
+      context.arc(x, y, reach, 0, Math.PI * 2);
+      context.fill();
+      if (index === 1) {
+        context.fillStyle = "rgba(255, 170, 190, 0.9)";
+        context.font = `${Math.round(reach * 0.18)}px sans-serif`;
+        context.fillText("♥", x - reach * 0.08, y + reach * 0.06);
+      }
+    });
+    motes.forEach((mote) => {
+      mote.y -= mote.v * 0.015;
+      mote.x += mote.drift * 0.015;
+      if (mote.y < -0.02) mote.y = 1.02;
+      if (mote.x < 0) mote.x = 1;
+      if (mote.x > 1) mote.x = 0;
+      context.fillStyle = `rgba(210, 224, 255, ${mote.a})`;
+      context.beginPath();
+      context.arc(mote.x * width, mote.y * height, mote.r, 0, Math.PI * 2);
+      context.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
 renderIntro();
 renderHours();
 renderFilters();
 render();
 loadShelf();
+startSky();
