@@ -32,10 +32,21 @@ body {
 
 .shelf-head {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-  gap: 36px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(220px, 0.7fr) minmax(280px, 0.85fr);
+  gap: 28px;
   align-items: center;
   padding: 48px 28px 8px;
+}
+
+.sky {
+  height: 220px;
+  min-width: 0;
+}
+
+.sky canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .intro-block h1 {
@@ -121,6 +132,32 @@ body {
 .heart.on { color: #ff6b8a; background: rgba(90, 18, 36, 0.9); }
 
 .note-label { display: block; margin-top: 8px; }
+
+.who {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.who button {
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c5d0e2;
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.who button[aria-pressed="true"] {
+  background: rgba(61, 126, 255, 0.85);
+  color: white;
+}
+
+.who button[data-who="her"][aria-pressed="true"] {
+  background: rgba(180, 50, 90, 0.9);
+}
 
 .note {
   width: 100%;
@@ -492,6 +529,7 @@ main { padding: 12px 28px 40px; }
 
 @media (max-width: 720px) {
   .shelf-head { grid-template-columns: 1fr; gap: 22px; padding: 28px 16px 4px; }
+  .sky { display: none; }
   .toolbar { flex-direction: column; align-items: stretch; padding-left: 16px; padding-right: 16px; }
   .top {
     flex-direction: column;
